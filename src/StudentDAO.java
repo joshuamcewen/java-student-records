@@ -180,6 +180,7 @@ public class StudentDAO {
             stmt.setString(8, student.getStartDate());
             stmt.setFloat(9, student.getBursary());
             stmt.setString(10, student.getEmail());
+            stmt.setInt(11, student.getStudentNumber());
             stmt.executeUpdate();
 
             return true;

@@ -7,6 +7,7 @@ public class Student extends Person {
 
     Student(String name, String gender, String dob, String address, String postcode, int sNumber, String cTitle, String startDate, float bursary, String email) {
         super(name, gender, dob, address, postcode);
+        // Use the setters when validation implemented?
         this.studentNumber = sNumber;
         this.courseTitle = cTitle;
         this.startDate = startDate;

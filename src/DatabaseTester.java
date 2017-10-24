@@ -32,11 +32,11 @@ public class DatabaseTester {
 
         System.out.println();
 
-        // Update the student we just created.
+        //  Update the student we just created.
         System.out.println("Updating student with the ID: 10202344");
         try {
-            boolean deleted = StudentDAO.updateStudent(StudentDAO.getStudent(10202344));
-            if(deleted) {
+            boolean updated = StudentDAO.updateStudent(new Student("James Mayle", "M", "20-01-1951", "Lancaster", "LA4 4RE", 10202344, "Mechanical Engineering", "19-09-2010", 0, "jmay@mmumail.com"));
+            if(updated) {
                 System.out.println("Student updated.");
             } else {
                 System.out.println("Unable to update student.");
@@ -59,6 +59,7 @@ public class DatabaseTester {
         System.out.println();
 
         // Delete the student we just created.
+        /*
         System.out.println("Deleting the student with the ID: 10202344");
         try {
             boolean deleted = StudentDAO.deleteStudent(10202344);
@@ -70,5 +71,6 @@ public class DatabaseTester {
         } catch(SQLException e) {
             System.out.println(e.getMessage());
         }
+        */
     }
 }
