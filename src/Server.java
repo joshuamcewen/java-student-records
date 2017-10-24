@@ -7,6 +7,7 @@ import com.sun.net.httpserver.HttpServer;
 
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ public class Server {
             server.createContext("/user/update", new updateUserHandler());
             server.createContext("/user", new getUserHandler());
             server.createContext("/user/delete", new deleteUserHandler());
+            server.createContext("/access", new getTokenHandler());
             server.setExecutor(null);
             server.start();
             System.out.println("Server started on port 8005.");
@@ -31,15 +33,26 @@ public class Server {
     private static class getUsersHandler implements HttpHandler {
         public void handle(HttpExchange exch) {
             try {
+
+                String response;
+                int responseCode;
+
                 if(exch.getRequestMethod().equalsIgnoreCase("GET")) {
                     Headers headers = exch.getResponseHeaders();
                     headers.set("Content-Type", "application/json");
 
-                    String response = new Gson().toJson(StudentDAO.getAllStudents());
-                    writeResponse(exch, 200, response);
+                    if(isValidToken(exch)) {
+                        responseCode = 200;
+                        response = new Gson().toJson(StudentDAO.getAllStudents());
+                    } else {
+                        responseCode = 400;
+                        response = "Invalid API key";
+                    }
                 } else {
-                    writeResponse(exch, 400, "Invalid GET request");
+                    responseCode = 400;
+                    response = "Invalid GET request";
                 }
+                writeResponse(exch, responseCode, response);
             } catch(Exception e) {
                 System.out.println(e.getMessage());
             }
@@ -49,43 +62,58 @@ public class Server {
     private static class setUserHandler implements HttpHandler {
         public void handle(HttpExchange exch) {
             try {
+
+                String response;
+                int responseCode;
+
                 if(exch.getRequestMethod().equalsIgnoreCase("POST")) {
-                    // DO SOMETHING WITH THE POST DATA
-                    StringBuilder response = new StringBuilder(); // New string, can be altered
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(exch.getRequestBody())); // Read the req
-                    String output;
+                    if(isValidToken(exch)) {
+                        StringBuilder request = new StringBuilder(); // New string, can be altered
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(exch.getRequestBody())); // Read the req
+                        String output;
 
-                    while((output = reader.readLine()) != null) {
-                        response.append(output); // Append request line by line to StringBuilder.
+                        while ((output = reader.readLine()) != null) {
+                            request.append(output); // Append request line by line to StringBuilder.
+                        }
+
+                        // Parse the JSON and create an instance JsonObject from it.
+                        JsonObject student = new Gson().fromJson(request.toString(), JsonObject.class);
+
+                        // Access the JSON keys and their values
+                        try {
+                            String name = student.get("name").getAsString();
+                            String gender = student.get("gender").getAsString();
+                            String dob = student.get("dob").getAsString();
+                            String address = student.get("address").getAsString();
+                            String postcode = student.get("postcode").getAsString();
+                            int sNumber = student.get("studentNumber").getAsInt();
+                            String cTitle = student.get("courseTitle").getAsString();
+                            String startDate = student.get("startDate").getAsString();
+                            float bursary = student.get("bursary").getAsFloat();
+                            String email = student.get("email").getAsString();
+
+                            // Insert a student into the db using the values above.
+
+                            StudentDAO.insertStudent(new Student(name, gender, dob, address, postcode, sNumber, cTitle, startDate, bursary, email));
+
+                            responseCode = 200;
+                            response = "Successfully added student";
+                        } catch (Exception e) {
+                            responseCode = 400;
+                            response = "Unable to add student: " + e.getMessage();
+                            writeResponse(exch, responseCode, response);
+                        }
+                        // Close the reader and write the response to the browser.
+                        reader.close();
+                    } else {
+                        responseCode = 400;
+                        response = "Invalid API key";
                     }
-
-                    // Parse the JSON and create an instance JsonObject from it.
-                    JsonObject student = new Gson().fromJson(response.toString(), JsonObject.class);
-
-                    // Access the JSON keys and their values
-                    try {
-                        String name = student.get("name").getAsString();
-                        String gender = student.get("gender").getAsString();
-                        String dob = student.get("dob").getAsString();
-                        String address = student.get("address").getAsString();
-                        String postcode = student.get("postcode").getAsString();
-                        int sNumber = student.get("studentNumber").getAsInt();
-                        String cTitle = student.get("courseTitle").getAsString();
-                        String startDate = student.get("startDate").getAsString();
-                        float bursary = student.get("bursary").getAsFloat();
-                        String email = student.get("email").getAsString();
-
-                        // Insert a student into the db using the values above.
-                        StudentDAO.insertStudent(new Student(name, gender, dob, address, postcode, sNumber, cTitle, startDate, bursary, email));
-                        writeResponse(exch, 200, "Successfully added student");
-                    } catch(Exception e) {
-                        writeResponse(exch, 200, "Unable to add student");
-                    }
-                    // Close the reader and write the response to the browser.
-                    reader.close();
                 } else {
-                    writeResponse(exch, 400, "Invalid POST request");
+                    responseCode = 400;
+                    response = "Invalid POST request";
                 }
+                writeResponse(exch, responseCode, response);
             } catch(Exception e) {
                 System.out.println(e.getMessage());
             }
@@ -95,44 +123,57 @@ public class Server {
     private static class updateUserHandler implements HttpHandler {
         public void handle(HttpExchange exch) {
             try {
+
+                String response;
+                int responseCode;
+
                 if(exch.getRequestMethod().equalsIgnoreCase("PUT")) {
-                    // DO SOMETHING WITH THE POST DATA
-                    StringBuilder response = new StringBuilder(); // New string, can be altered
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(exch.getRequestBody())); // Read the req
-                    String output;
+                    if(isValidToken(exch)) {
+                        StringBuilder request = new StringBuilder(); // New string, can be altered
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(exch.getRequestBody())); // Read the req
+                        String output;
 
-                    while((output = reader.readLine()) != null) {
-                        response.append(output); // Append request line by line to StringBuilder.
+                        while((output = reader.readLine()) != null) {
+                            request.append(output); // Append request line by line to StringBuilder.
+                        }
+
+                        // Parse the JSON and create an instance JsonObject from it.
+                        JsonObject student = new Gson().fromJson(request.toString(), JsonObject.class);
+
+                        // Access the JSON keys and their values
+                        try {
+                            String name = student.get("name").getAsString();
+                            String gender = student.get("gender").getAsString();
+                            String dob = student.get("dob").getAsString();
+                            String address = student.get("address").getAsString();
+                            String postcode = student.get("postcode").getAsString();
+                            int sNumber = student.get("studentNumber").getAsInt();
+                            String cTitle = student.get("courseTitle").getAsString();
+                            String startDate = student.get("startDate").getAsString();
+                            float bursary = student.get("bursary").getAsFloat();
+                            String email = student.get("email").getAsString();
+
+                            // update a student into the db using the values above.
+                            Student updated_student = new Student(name, gender, dob, address, postcode, sNumber, cTitle, startDate, bursary, email);
+                            StudentDAO.updateStudent(updated_student);
+
+                            responseCode = 200;
+                            response = "Successfully updated " + updated_student.getName();
+                        } catch(Exception e) {
+                            responseCode = 400;
+                            response = "Unable to update student: " + e.getMessage();
+                        }
+                        // Close the reader and write the response to the browser.
+                        reader.close();
+                    } else {
+                        responseCode = 400;
+                        response = "Invalid API key";
                     }
-
-                    // Parse the JSON and create an instance JsonObject from it.
-                    JsonObject student = new Gson().fromJson(response.toString(), JsonObject.class);
-
-                    // Access the JSON keys and their values
-                    try {
-                        String name = student.get("name").getAsString();
-                        String gender = student.get("gender").getAsString();
-                        String dob = student.get("dob").getAsString();
-                        String address = student.get("address").getAsString();
-                        String postcode = student.get("postcode").getAsString();
-                        int sNumber = student.get("studentNumber").getAsInt();
-                        String cTitle = student.get("courseTitle").getAsString();
-                        String startDate = student.get("startDate").getAsString();
-                        float bursary = student.get("bursary").getAsFloat();
-                        String email = student.get("email").getAsString();
-
-                        // update a student into the db using the values above.
-                        Student updated_student = new Student(name, gender, dob, address, postcode, sNumber, cTitle, startDate, bursary, email);
-                        StudentDAO.updateStudent(updated_student);
-                        writeResponse(exch, 200, "Successfully updated " + updated_student.getName());
-                    } catch(Exception e) {
-                        writeResponse(exch, 400, "Unable to update student.");
-                    }
-                    // Close the reader and write the response to the browser.
-                    reader.close();
                 } else {
-                    writeResponse(exch, 400, "Invalid PUT request");
+                    responseCode = 400;
+                    response = "Invalid PUT request";
                 }
+                writeResponse(exch, responseCode, response);
             } catch(Exception e) {
                 System.out.println(e.getMessage());
             }
@@ -142,6 +183,10 @@ public class Server {
     private static class getUserHandler implements HttpHandler {
         public void handle(HttpExchange exch) {
             try {
+
+                String response;
+                int responseCode;
+
                 if(exch.getRequestMethod().equalsIgnoreCase("GET")) {
                     Headers headers = exch.getResponseHeaders();
                     headers.set("Content-Type", "application/json");
@@ -149,23 +194,70 @@ public class Server {
                     String queryString = exch.getRequestURI().getQuery();
 
                     if(queryString != null) {
+                        if(isValidToken(exch)) {
 
-                        Map<String, String> params = getParameters(queryString);
-                        int stuNumber = Integer.parseInt(params.get("id"));
-                        Student retrieved = StudentDAO.getStudent(stuNumber);
+                            Map<String, String> params = getParameters(queryString);
+                            int stuNumber = Integer.parseInt(params.get("id"));
+                            Student retrieved = StudentDAO.getStudent(stuNumber);
 
-                        if(retrieved != null) {
-                            String response = new Gson().toJson(retrieved);
-                            writeResponse(exch, 200, response);
+                            if (retrieved != null) {
+                                responseCode = 200;
+                                response = new Gson().toJson(retrieved);
+                            } else {
+                                responseCode = 400;
+                                response = "Student does not exist";
+                            }
                         } else {
-                            writeResponse(exch, 400, "Student does not exist");
+                            responseCode = 400;
+                            response = "Invalid API key";
                         }
                     } else {
-                        writeResponse(exch, 400, "No parameters supplied.");
+                        responseCode = 400;
+                        response = "Parameters not set";
                     }
                 } else {
-                    writeResponse(exch, 400, "Invalid GET request");
+                    responseCode = 400;
+                    response = "Invalid GET request";
                 }
+                writeResponse(exch, responseCode, response);
+            } catch(Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    private static class getTokenHandler implements HttpHandler {
+        public void handle(HttpExchange exch) {
+            try {
+
+                String response;
+                int responseCode;
+
+                if(exch.getRequestMethod().equalsIgnoreCase("GET")) {
+                    String queryString = exch.getRequestURI().getQuery();
+
+                    if(queryString != null) {
+                        Map<String, String> params = getParameters(queryString);
+                        String username = params.get("username");
+                        String password = params.get("password");
+
+                        if (StudentDAO.checkLoginCredentials(username, password)) {
+                            String token = StudentDAO.getApiKey(username);
+                            responseCode = 200;
+                            response = "Access token for " + username + ": " + token;
+                        } else {
+                            responseCode = 400;
+                            response = "Invalid credentials";
+                        }
+                    } else {
+                        responseCode = 400;
+                        response = "Parameters not set";
+                    }
+                } else {
+                    responseCode = 400;
+                    response = "Invalid GET request";
+                }
+                writeResponse(exch, responseCode, response);
             } catch(Exception e) {
                 System.out.println(e.getMessage());
             }
@@ -175,30 +267,61 @@ public class Server {
     private static class deleteUserHandler implements HttpHandler {
         public void handle(HttpExchange exch) {
             try {
+
+                String response;
+                int responseCode;
+
                 if(exch.getRequestMethod().equalsIgnoreCase("DELETE")) {
                     String queryString = exch.getRequestURI().getQuery();
 
                     if(queryString != null) {
+                        if(isValidToken(exch)) {
+                            Map<String, String> params = getParameters(queryString);
+                            int stuNumber = Integer.parseInt(params.get("id"));
+                            boolean deleted = StudentDAO.deleteStudent(stuNumber);
 
-                        Map<String, String> params = getParameters(queryString);
-                        int stuNumber = Integer.parseInt(params.get("id"));
-                        boolean deleted = StudentDAO.deleteStudent(stuNumber);
-
-                        if(deleted) {
-                            writeResponse(exch, 200, "Student with ID: " + stuNumber + " deleted");
+                            if (deleted) {
+                                responseCode = 200;
+                                response = "Student with ID: " + stuNumber + " deleted";
+                            } else {
+                                responseCode = 400;
+                                response = "Student does not exist.";
+                            }
                         } else {
-                            writeResponse(exch, 400, "Student does not exist");
+                            responseCode = 400;
+                            response = "Invalid API key";
                         }
                     } else {
-                        writeResponse(exch, 400, "No parameters supplied.");
+                        responseCode = 400;
+                        response = "Parameters not set";
                     }
                 } else {
-                    writeResponse(exch, 400, "Invalid DELETE request");
+                    responseCode = 400;
+                    response = "Invalid DELETE request";
                 }
+                writeResponse(exch, responseCode, response);
             } catch(Exception e) {
                 System.out.println(e.getMessage());
             }
         }
+    }
+
+    private static boolean isValidToken(HttpExchange exch) {
+        String queryString = exch.getRequestURI().getQuery();
+
+        if(queryString != null) {
+            Map<String, String> params = getParameters(queryString);
+            String apiKey = params.get("token");
+
+            try {
+                if(apiKey != null && StudentDAO.checkApiKey(apiKey)) {
+                    return true;
+                }
+            } catch(SQLException e) {
+                return false;
+            }
+        }
+        return false;
     }
 
     private static void writeResponse(HttpExchange exch, int status, String response) throws Exception {
@@ -209,7 +332,7 @@ public class Server {
     }
 
     private static Map<String, String> getParameters(String queryString) {
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
 
         for(String param : queryString.split("&")) { // Split the keys and their values
             String pair[] = param.split("="); // Separate the key and value

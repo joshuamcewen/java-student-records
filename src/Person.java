@@ -8,15 +8,15 @@ public class Person {
     private String postcode;
 
     Person(String name, String gender, String dob, String address, String postcode) {
-        this.name = name;
-        this.gender = gender;
-        this.dob = dob;
-        this.address = address;
-        this.postcode = postcode;
+        this.setName(name);
+        this.setGender(gender);
+        this.setDob(dob);
+        this.setAddress(address);
+        this.setPostcode(postcode);
     }
     
     String getName() { return this.name; }
-    void setName(String name) throws Exception {
+    void setName(String name) {
         if(name.matches("^[A-Za-z\\s]{1,45}+$")) {
             this.name = name;
         } else {
@@ -44,7 +44,7 @@ public class Person {
 
     String getAddress() { return this.address; }
     void setAddress(String address) {
-        if(address.matches("^[A-Za-z'\\.\\s]{1,60}+$")) {
+        if(address.matches("^[A-Za-z'.\\s]{1,60}+$")) {
             this.address = address;
         } else {
             throw new IllegalArgumentException("Address must contain letters, numbers and ('.) only.");
@@ -53,7 +53,11 @@ public class Person {
 
     String getPostcode() { return this.postcode; }
     void setPostcode(String postcode) {
-        this.postcode = postcode;
+        if(postcode.matches("^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z][A-Z]$")) {
+            this.postcode = postcode;
+        } else {
+            throw new IllegalArgumentException("Postcode must be formatted in UK standard.");
+        }
     }
 }
 

@@ -197,11 +197,82 @@ public class StudentDAO {
         return false;
     }
 
-    boolean checkLoginCredentials(String username, String password) {
+    static boolean checkLoginCredentials(String username, String password) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        String query = "SELECT Token FROM users WHERE Username = ? AND Password = ?;";
+
+        try {
+            conn = getDBConnection();
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+            result = stmt.executeQuery();
+
+            if(result.next()) {
+                return true;
+            }
+        } catch(SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            if(result != null) { result.close(); }
+            if(stmt != null) { stmt.close(); }
+            if(conn != null) { conn.close(); }
+        }
+
         return false;
     }
 
-    boolean checkApiKey(String token) {
+    static String getApiKey(String username) throws SQLException {
+        String apiKey = null;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        String query = "SELECT Token FROM users WHERE Username = ?;";
+
+        try {
+            conn = getDBConnection();
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, username);
+            result = stmt.executeQuery();
+
+            while(result.next()) {
+                return result.getString("token");
+            }
+        } catch(SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            if(result != null) { result.close(); }
+            if(stmt != null) { stmt.close(); }
+            if(conn != null) { conn.close(); }
+        }
+
+        return apiKey;
+    }
+
+    static boolean checkApiKey(String token) throws SQLException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        String query = "SELECT Token FROM users WHERE Token = ?;";
+
+        try {
+            conn = getDBConnection();
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, token);
+            result = stmt.executeQuery();
+
+            if(result.next()) {
+                return true;
+            }
+        } catch(SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            if(result != null) { result.close(); }
+            if(stmt != null) { stmt.close(); }
+            if(conn != null) { conn.close(); }
+        }
         return false;
     }
 }
