@@ -16,9 +16,10 @@ public class Server {
             HttpServer server = HttpServer.create(new InetSocketAddress(8005), 0);
             // Route handling
             server.createContext("/users", new getUsersHandler());
-            server.createContext("/users/new", new setUserHandler());
-            server.createContext("/users/update", new updateUserHandler());
+            server.createContext("/user/new", new setUserHandler());
+            server.createContext("/user/update", new updateUserHandler());
             server.createContext("/user", new getUserHandler());
+            server.createContext("/user/delete", new deleteUserHandler());
             server.setExecutor(null);
             server.start();
             System.out.println("Server started on port 8005.");
@@ -171,6 +172,35 @@ public class Server {
         }
     }
 
+    private static class deleteUserHandler implements HttpHandler {
+        public void handle(HttpExchange exch) {
+            try {
+                if(exch.getRequestMethod().equalsIgnoreCase("DELETE")) {
+                    String queryString = exch.getRequestURI().getQuery();
+
+                    if(queryString != null) {
+
+                        Map<String, String> params = getParameters(queryString);
+                        int stuNumber = Integer.parseInt(params.get("id"));
+                        boolean deleted = StudentDAO.deleteStudent(stuNumber);
+
+                        if(deleted) {
+                            writeResponse(exch, 200, "Student with ID: " + stuNumber + " deleted");
+                        } else {
+                            writeResponse(exch, 400, "Student does not exist");
+                        }
+                    } else {
+                        writeResponse(exch, 400, "No parameters supplied.");
+                    }
+                } else {
+                    writeResponse(exch, 400, "Invalid DELETE request");
+                }
+            } catch(Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
     private static void writeResponse(HttpExchange exch, int status, String response) throws Exception {
         exch.sendResponseHeaders(status, response.getBytes().length);
         OutputStream os = exch.getResponseBody();
@@ -191,7 +221,7 @@ public class Server {
             }
         }
 
-        return params; // Return the map for access.s
+        return params; // Return the map for access
     }
 
 }

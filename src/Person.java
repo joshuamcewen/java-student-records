@@ -1,3 +1,5 @@
+import java.util.IllegalFormatException;
+
 public class Person {
     private String name;
     private String gender;
@@ -13,19 +15,45 @@ public class Person {
         this.postcode = postcode;
     }
     
-    public String getName() { return this.name; }
-    public void setName(String name) { this.name = name; }
+    String getName() { return this.name; }
+    void setName(String name) throws Exception {
+        if(name.matches("^[A-Za-z\\s]{1,45}+$")) {
+            this.name = name;
+        } else {
+            throw new IllegalArgumentException("Name must contain letters and spaces only.");
+        }
+    }
 
-    public String getGender() { return this.gender; }
-    public void setGender(String gender) { this.gender = gender; }
+    String getGender() { return this.gender; }
+    void setGender(String gender) {
+        if(gender.matches("^[A-Za-z]{1,7}+$")) {
+            this.gender = gender;
+        } else {
+            throw new IllegalArgumentException("Gender must contain letters only.");
+        }
+    }
 
-    public String getDob() { return this.dob; }
-    public void setDob(String dob) { this.dob = dob; }
+    String getDob() { return this.dob; }
+    void setDob(String dob) {
+        if(dob.matches("^\\d\\d-\\d\\d-\\d\\d\\d\\d$")) {
+            this.dob = dob;
+        } else {
+            throw new IllegalArgumentException("Date must be formatted DD-MM-YYYY.");
+        }
+    }
 
-    public String getAddress() { return this.address; }
-    public void setAddress(String address) { this.address = address; }
+    String getAddress() { return this.address; }
+    void setAddress(String address) {
+        if(address.matches("^[A-Za-z'\\.\\s]{1,60}+$")) {
+            this.address = address;
+        } else {
+            throw new IllegalArgumentException("Address must contain letters, numbers and ('.) only.");
+        }
+    }
 
-    public String getPostcode() { return this.postcode; }
-    public void setPostcode(String postcode) { this.postcode = postcode; }
+    String getPostcode() { return this.postcode; }
+    void setPostcode(String postcode) {
+        this.postcode = postcode;
+    }
 }
 
