@@ -25,6 +25,7 @@ public class Server {
     public static void main(String[] args) {
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress(8005), 0);
+
             // Route handling
             server.createContext("/users", new getUsersHandler());
             server.createContext("/user/new", new setUserHandler());
