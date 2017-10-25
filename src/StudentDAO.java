@@ -1,7 +1,16 @@
 import java.sql.*;
 import java.util.ArrayList;
 
+/**
+ * Provides methods that access the database and manipulate the data in some way (CRUD).
+ * @author Joshua McEwen (16012396)
+ */
+
 public class StudentDAO {
+    /**
+     * Makes and returns a connection to the database.
+     * @return Instance of the Connection class for the corresponding database
+     */
     private static Connection getDBConnection() {
         Connection conn = null;
 
@@ -21,8 +30,12 @@ public class StudentDAO {
         return conn;
     }
 
-    static ArrayList<Student> getAllStudents() throws SQLException {
-        ArrayList<Student> students = new ArrayList<Student>();
+    /**
+     * Retrieves all students from the database, converts them into Student objects and returns as an ArrayList.
+     * @return ArrayList of Student objects
+     */
+    public static ArrayList<Student> getAllStudents() {
+        ArrayList<Student> students = new ArrayList<>();
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -51,15 +64,31 @@ public class StudentDAO {
         } catch(SQLException e) {
             System.out.println(e.getMessage());
         } finally {
-            if(result != null) { result.close(); }
-            if(stmt != null) { stmt.close(); }
-            if(conn != null) { conn.close(); }
+            // Always attempt to close resources
+            try {
+                if (result != null) {
+                    result.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
         }
 
         return students;
     }
 
-    static Student getStudent(int stuNumber) throws SQLException {
+    /**
+     * Retrieves a specific student from the database based on student number and returns as Student object.
+     * @param stuNumber Student's student ID number
+     * @return Student object
+     */
+    public static Student getStudent(int stuNumber) {
         Student student = null;
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -89,22 +118,38 @@ public class StudentDAO {
         } catch(SQLException e) {
             System.out.println(e.getMessage());
         } finally {
-            if(result != null) { result.close(); }
-            if(stmt != null) { stmt.close(); }
-            if(conn != null) { conn.close(); }
+            // Always attempt to close resources
+            try {
+                if (result != null) {
+                    result.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
         }
 
         return student;
     }
 
-    static boolean insertStudent(Student student) throws SQLException {
+    /**
+     * Inserts a student record into the database from a supplied Student object.
+     * @param student Student object
+     * @return true/false depending on the outcome of the insertion.
+     */
+    public static boolean insertStudent(Student student) {
         Connection conn = null;
         PreparedStatement stmt = null;
         String query = "INSERT INTO students(Name, Gender, DOB, Address, Postcode, StudentNumber, CourseTitle, StartDate, Bursary, Email) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
         try {
             conn = getDBConnection();
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(false); // Transaction start
 
             stmt = conn.prepareStatement(query);
             stmt.setString(1, student.getName());
@@ -123,24 +168,36 @@ public class StudentDAO {
         } catch(SQLException e) {
             System.out.println(e.getMessage());
         } finally {
-            if(stmt != null) { stmt.close(); }
-            if(conn != null) {
-                conn.commit();
-                conn.close();
+            // Always attempt to close resources
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    conn.commit(); // Transaction end
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
             }
         }
 
         return false;
     }
 
-    static boolean deleteStudent(int stuNumber) throws SQLException {
+    /**
+     * Deletes a student record into the database from a supplied student ID number.
+     * @param stuNumber Student's student ID number
+     * @return true/false depending on the outcome of the deletion.
+     */
+    public static boolean deleteStudent(int stuNumber) {
         Connection conn = null;
         PreparedStatement stmt = null;
         String query = "DELETE FROM students WHERE StudentNumber = ?;";
 
         try {
             conn = getDBConnection();
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(false); // Transaction start
 
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, stuNumber);
@@ -150,24 +207,37 @@ public class StudentDAO {
         } catch(SQLException e) {
             System.out.println(e.getMessage());
         } finally {
-            if(stmt != null) { stmt.close(); }
-            if(conn != null) {
-                conn.commit();
-                conn.close();
+            // Always attempt to close resources
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    conn.commit(); // Transaction end
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
             }
         }
 
         return false;
     }
 
-    static boolean updateStudent(Student student) throws SQLException {
+    /**
+     * Updates a student record into the database from a supplied Student object, using the supplied student number
+     * to identify existing record.
+     * @param student Student object
+     * @return true/false depending on the outcome of the update.
+     */
+    public static boolean updateStudent(Student student) {
         Connection conn = null;
         PreparedStatement stmt = null;
         String query = "UPDATE students SET Name = ?, Gender = ?, DOB = ?, Address = ?, Postcode = ?, StudentNumber = ?, CourseTitle = ?, StartDate = ?, Bursary = ?, Email = ?  WHERE StudentNumber = ?;";
 
         try {
             conn = getDBConnection();
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(false); // Transaction start
 
             stmt = conn.prepareStatement(query);
             stmt.setString(1, student.getName());
@@ -187,17 +257,31 @@ public class StudentDAO {
         } catch(SQLException e) {
             System.out.println(e.getMessage());
         } finally {
-            if(stmt != null) { stmt.close(); }
-            if(conn != null) {
-                conn.commit();
-                conn.close();
+            // Always attempt to close resources
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    conn.commit(); // Transaction end
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
             }
         }
 
         return false;
     }
 
-    static boolean checkLoginCredentials(String username, String password) throws SQLException {
+    /**
+     * Checks for a user record with the supplied username and password, returning a boolean based on the outcome.
+     * Used to validate a user as having correct credentials for access.
+     * @param username User's username
+     * @param password User's password in plain text
+     * @return true/false depending on the outcome of the retrieval.
+     */
+    public static boolean checkLoginCredentials(String username, String password) {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -216,15 +300,31 @@ public class StudentDAO {
         } catch(SQLException e) {
             System.out.println(e.getMessage());
         } finally {
-            if(result != null) { result.close(); }
-            if(stmt != null) { stmt.close(); }
-            if(conn != null) { conn.close(); }
+            // Always attempt to close resources
+            try {
+                if (result != null) {
+                    result.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
         }
 
         return false;
     }
 
-    static String getApiKey(String username) throws SQLException {
+    /**
+     * Returns the API token from the database for the supplied username.
+     * @param username User's username
+     * @return API token
+     */
+    public static String getApiKey(String username) {
         String apiKey = null;
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -237,21 +337,38 @@ public class StudentDAO {
             stmt.setString(1, username);
             result = stmt.executeQuery();
 
-            while(result.next()) {
+            if(result.next()) {
                 return result.getString("token");
             }
         } catch(SQLException e) {
             System.out.println(e.getMessage());
         } finally {
-            if(result != null) { result.close(); }
-            if(stmt != null) { stmt.close(); }
-            if(conn != null) { conn.close(); }
+            // Always attempt to close resources
+            try {
+                if (result != null) {
+                    result.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
         }
 
         return apiKey;
     }
 
-    static boolean checkApiKey(String token) throws SQLException {
+    /**
+     * Checks the database against the supplied API token for a match. Returns a boolean based on the outcome.
+     * Used for validating genuine requests.
+     * @param token User's API token
+     * @return true/false depending on the outcome of the retrieval.
+     */
+    public static boolean checkApiKey(String token) {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -269,10 +386,22 @@ public class StudentDAO {
         } catch(SQLException e) {
             System.out.println(e.getMessage());
         } finally {
-            if(result != null) { result.close(); }
-            if(stmt != null) { stmt.close(); }
-            if(conn != null) { conn.close(); }
+            // Always attempt to close resources
+            try {
+                if (result != null) {
+                    result.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
         }
+
         return false;
     }
 }

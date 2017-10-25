@@ -1,12 +1,25 @@
-import java.util.IllegalFormatException;
+/**
+ * Represents a person
+ * @author Joshua McEwen (16012396)
+ */
 
 public class Person {
+
     private String name;
     private String gender;
     private String dob;
     private String address;
     private String postcode;
 
+    /**
+     * Constructor for Person class.
+     *
+     * @param name Person's full name
+     * @param gender Person's gender
+     * @param dob Person's date of birth
+     * @param address Person's address
+     * @param postcode Person's postcode
+     */
     Person(String name, String gender, String dob, String address, String postcode) {
         this.setName(name);
         this.setGender(gender);
@@ -16,7 +29,7 @@ public class Person {
     }
     
     String getName() { return this.name; }
-    void setName(String name) {
+    public void setName(String name) {
         if(name.matches("^[A-Za-z\\s]{1,45}+$")) {
             this.name = name;
         } else {
@@ -25,7 +38,13 @@ public class Person {
     }
 
     String getGender() { return this.gender; }
-    void setGender(String gender) {
+
+    /**
+     * Validates the gender as containing letters only and being of 1-7 characters in length, before setting.
+     * @param gender Person's gender
+     * @throws IllegalArgumentException if validation fails
+     */
+    public void setGender(String gender) {
         if(gender.matches("^[A-Za-z]{1,7}+$")) {
             this.gender = gender;
         } else {
@@ -34,7 +53,13 @@ public class Person {
     }
 
     String getDob() { return this.dob; }
-    void setDob(String dob) {
+
+    /**
+     * Validates the date of birth provided as being in the format DD-MM-YYYY, before setting.
+     * @param dob Person's date of birth
+     * @throws IllegalArgumentException if validation fails
+     */
+    public void setDob(String dob) {
         if(dob.matches("^\\d\\d-\\d\\d-\\d\\d\\d\\d$")) {
             this.dob = dob;
         } else {
@@ -43,7 +68,13 @@ public class Person {
     }
 
     String getAddress() { return this.address; }
-    void setAddress(String address) {
+
+    /**
+     * Validates the address as containing letters, whitespace and (.) only as well as being 1-60 characters in length, before setting.
+     * @param address Person's address
+     * @throws IllegalArgumentException if validation fails
+     */
+    public void setAddress(String address) {
         if(address.matches("^[A-Za-z'.\\s]{1,60}+$")) {
             this.address = address;
         } else {
@@ -52,7 +83,13 @@ public class Person {
     }
 
     String getPostcode() { return this.postcode; }
-    void setPostcode(String postcode) {
+
+    /**
+     * Validates the postcode as being in a standard UK format, before setting.
+     * @param postcode Person's postcode
+     * @throws IllegalArgumentException if validation fails
+     */
+    public void setPostcode(String postcode) {
         if(postcode.matches("^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z][A-Z]$")) {
             this.postcode = postcode;
         } else {

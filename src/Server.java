@@ -11,7 +11,17 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Creates a HTTP Server and routes with corresponding handlers for CRUD operations on the database.
+ * @author Joshua McEwen (16012396)
+ */
+
 public class Server {
+    /**
+     * Entry point for starting the server. Creates the HttpServer object on port 8005 and sets routes/handlers that
+     * execute when routes are accessed.
+     * @param args Command-line arguments
+     */
     public static void main(String[] args) {
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress(8005), 0);
@@ -30,7 +40,15 @@ public class Server {
         }
     }
 
+    /**
+     * Handler to retrieve all users.
+     */
     private static class getUsersHandler implements HttpHandler {
+        /**
+         * Return all students from the database in JSON format when a valid GET request is made.
+         * Implementation of {@link HttpHandler#handle}.
+         * @param exch HttpExchange object to access request details/tailor response
+         */
         public void handle(HttpExchange exch) {
             try {
 
@@ -59,7 +77,15 @@ public class Server {
         }
     }
 
+    /**
+     * Handler to create a new user.
+     */
     private static class setUserHandler implements HttpHandler {
+        /**
+         * Insert a student into the database when a valid POST request is made with valid JSON for the student.
+         * Implementation of {@link HttpHandler#handle}.
+         * @param exch HttpExchange object to access request details/tailor response
+         */
         public void handle(HttpExchange exch) {
             try {
 
@@ -120,7 +146,15 @@ public class Server {
         }
     }
 
+    /**
+     * Handler to update an existing student.
+     */
     private static class updateUserHandler implements HttpHandler {
+        /**
+         * Update an existing student in the database when a valid PUT request is made with valid JSON for the student.
+         * Implementation of {@link HttpHandler#handle}.
+         * @param exch HttpExchange object to access request details/tailor response
+         */
         public void handle(HttpExchange exch) {
             try {
 
@@ -180,7 +214,16 @@ public class Server {
         }
     }
 
+    /**
+     * Handler to retrieve a specific user.
+     */
     private static class getUserHandler implements HttpHandler {
+        /**
+         * Return a specific student based on student number passed in id parameter. A valid GET request and student number
+         * are required.
+         * Implementation of {@link HttpHandler#handle}.
+         * @param exch HttpExchange object to access request details/tailor response
+         */
         public void handle(HttpExchange exch) {
             try {
 
@@ -190,68 +233,23 @@ public class Server {
                 if(exch.getRequestMethod().equalsIgnoreCase("GET")) {
                     Headers headers = exch.getResponseHeaders();
                     headers.set("Content-Type", "application/json");
-
                     String queryString = exch.getRequestURI().getQuery();
 
-                    if(queryString != null) {
-                        if(isValidToken(exch)) {
-
-                            Map<String, String> params = getParameters(queryString);
-                            int stuNumber = Integer.parseInt(params.get("id"));
-                            Student retrieved = StudentDAO.getStudent(stuNumber);
-
-                            if (retrieved != null) {
-                                responseCode = 200;
-                                response = new Gson().toJson(retrieved);
-                            } else {
-                                responseCode = 400;
-                                response = "Student does not exist";
-                            }
-                        } else {
-                            responseCode = 400;
-                            response = "Invalid API key";
-                        }
-                    } else {
-                        responseCode = 400;
-                        response = "Parameters not set";
-                    }
-                } else {
-                    responseCode = 400;
-                    response = "Invalid GET request";
-                }
-                writeResponse(exch, responseCode, response);
-            } catch(Exception e) {
-                System.out.println(e.getMessage());
-            }
-        }
-    }
-
-    private static class getTokenHandler implements HttpHandler {
-        public void handle(HttpExchange exch) {
-            try {
-
-                String response;
-                int responseCode;
-
-                if(exch.getRequestMethod().equalsIgnoreCase("GET")) {
-                    String queryString = exch.getRequestURI().getQuery();
-
-                    if(queryString != null) {
+                    if(isValidToken(exch)) {
                         Map<String, String> params = getParameters(queryString);
-                        String username = params.get("username");
-                        String password = params.get("password");
+                        int stuNumber = Integer.parseInt(params.get("id"));
+                        Student retrieved = StudentDAO.getStudent(stuNumber);
 
-                        if (StudentDAO.checkLoginCredentials(username, password)) {
-                            String token = StudentDAO.getApiKey(username);
+                        if (retrieved != null) {
                             responseCode = 200;
-                            response = "Access token for " + username + ": " + token;
+                            response = new Gson().toJson(retrieved);
                         } else {
                             responseCode = 400;
-                            response = "Invalid credentials";
+                            response = "Invalid student ID";
                         }
                     } else {
                         responseCode = 400;
-                        response = "Parameters not set";
+                        response = "Invalid API key";
                     }
                 } else {
                     responseCode = 400;
@@ -264,7 +262,16 @@ public class Server {
         }
     }
 
+    /**
+     * Handler to delete an existing student.
+     */
     private static class deleteUserHandler implements HttpHandler {
+        /**
+         * Delete an existing student in the database based on a student number passed in id parameter. A valid DELETE request
+         * and student number are required.
+         * Implementation of {@link HttpHandler#handle}.
+         * @param exch HttpExchange object to access request details/tailor response
+         */
         public void handle(HttpExchange exch) {
             try {
 
@@ -274,26 +281,21 @@ public class Server {
                 if(exch.getRequestMethod().equalsIgnoreCase("DELETE")) {
                     String queryString = exch.getRequestURI().getQuery();
 
-                    if(queryString != null) {
-                        if(isValidToken(exch)) {
-                            Map<String, String> params = getParameters(queryString);
-                            int stuNumber = Integer.parseInt(params.get("id"));
-                            boolean deleted = StudentDAO.deleteStudent(stuNumber);
+                    if(isValidToken(exch)) {
+                        Map<String, String> params = getParameters(queryString);
+                        int stuNumber = Integer.parseInt(params.get("id"));
+                        boolean deleted = StudentDAO.deleteStudent(stuNumber);
 
-                            if (deleted) {
-                                responseCode = 200;
-                                response = "Student with ID: " + stuNumber + " deleted";
-                            } else {
-                                responseCode = 400;
-                                response = "Student does not exist.";
-                            }
+                        if (deleted) {
+                            responseCode = 200;
+                            response = "Student with ID: " + stuNumber + " deleted";
                         } else {
                             responseCode = 400;
-                            response = "Invalid API key";
+                            response = "Invalid student ID";
                         }
                     } else {
                         responseCode = 400;
-                        response = "Parameters not set";
+                        response = "Invalid API key";
                     }
                 } else {
                     responseCode = 400;
@@ -306,6 +308,53 @@ public class Server {
         }
     }
 
+    /**
+     * Handler to retrieve an API token.
+     */
+    private static class getTokenHandler implements HttpHandler {
+        /**
+         * Retrieve an API token from the users table from the values supplied by username and password parameters.
+         * A valid GET request and credentials are required.
+         * Implementation of {@link HttpHandler#handle}.
+         * @param exch HttpExchange object to access request details/tailor response
+         */
+        public void handle(HttpExchange exch) {
+            try {
+
+                String response;
+                int responseCode;
+
+                if(exch.getRequestMethod().equalsIgnoreCase("GET")) {
+                    String queryString = exch.getRequestURI().getQuery();
+
+                    Map<String, String> params = getParameters(queryString);
+                    String username = params.get("username");
+                    String password = params.get("password");
+
+                    if (StudentDAO.checkLoginCredentials(username, password)) {
+                        String token = StudentDAO.getApiKey(username);
+                        responseCode = 200;
+                        response = "Access token for " + username + ": " + token;
+                    } else {
+                        responseCode = 400;
+                        response = "Invalid credentials";
+                    }
+                } else {
+                    responseCode = 400;
+                    response = "Invalid GET request";
+                }
+                writeResponse(exch, responseCode, response);
+            } catch(Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Checks the API token supplied as a URL parameter and returns a boolean based on the outcome of that check.
+     * @param exch HttpExchange object to access request details
+     * @return true/false depending on whether the token exists or not.
+     */
     private static boolean isValidToken(HttpExchange exch) {
         String queryString = exch.getRequestURI().getQuery();
 
@@ -313,24 +362,32 @@ public class Server {
             Map<String, String> params = getParameters(queryString);
             String apiKey = params.get("token");
 
-            try {
-                if(apiKey != null && StudentDAO.checkApiKey(apiKey)) {
-                    return true;
-                }
-            } catch(SQLException e) {
-                return false;
+            if(apiKey != null && StudentDAO.checkApiKey(apiKey)) {
+                return true;
             }
         }
         return false;
     }
 
-    private static void writeResponse(HttpExchange exch, int status, String response) throws Exception {
+    /**
+     * Sets the headers for the response and writes the body to displayed to users when routes are accessed.
+     * @param exch HttpExchange object to modify and send response
+     * @param status A HTTP response code based on result of request
+     * @param response Textual response displayed to the user
+     * @throws IOException When response is invalid
+     */
+    private static void writeResponse(HttpExchange exch, int status, String response) throws IOException {
         exch.sendResponseHeaders(status, response.getBytes().length);
         OutputStream os = exch.getResponseBody();
         os.write(response.getBytes());
         os.close();
     }
 
+    /**
+     * Sets the headers for the response and writes the body to displayed to users when routes are accessed.
+     * @param queryString Query string from URL, gained from HttpExchange object.
+     * @return A map of the URL parameters (name and values)
+     */
     private static Map<String, String> getParameters(String queryString) {
         Map<String, String> params = new HashMap<>();
 
