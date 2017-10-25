@@ -13,3 +13,4 @@ hs_err_pid*
 *.xml
 /.idea/
 /bin/
+/programming-assignment.iml
