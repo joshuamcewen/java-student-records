@@ -423,7 +423,7 @@ public class StudentDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
-        String query = "SELECT Username FROM users WHERE username = ?;";
+        String query = "SELECT Username FROM users WHERE Username = ?;";
 
         try {
             conn = getDBConnection();
