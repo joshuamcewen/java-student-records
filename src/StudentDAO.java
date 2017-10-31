@@ -1,5 +1,6 @@
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Provides methods that access the database and manipulate the data in some way (CRUD).
@@ -101,7 +102,7 @@ public class StudentDAO {
             stmt.setInt(1, stuNumber);
             result = stmt.executeQuery();
 
-            while(result.next()) {
+            if(result.next()) {
                 String name = result.getString("Name");
                 String gender = result.getString("Gender");
                 String dob = result.getString("Dob");
@@ -362,6 +363,19 @@ public class StudentDAO {
         return apiKey;
     }
 
+    private static String generateApiKey() {
+
+        String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        StringBuilder apiKey = new StringBuilder();
+        Random rnd = new Random();
+        while (apiKey.length() < 18) { // length of the random string.
+            int index = (int) (rnd.nextFloat() * characters.length());
+            apiKey.append(characters.charAt(index));
+        }
+
+        return apiKey.toString();
+    }
+
     /**
      * Checks the database against the supplied API token for a match. Returns a boolean based on the outcome.
      * Used for validating genuine requests.
@@ -402,6 +416,86 @@ public class StudentDAO {
             }
         }
 
+        return false;
+    }
+
+    public static boolean checkUserExists(String username) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        String query = "SELECT Username FROM users WHERE username = ?;";
+
+        try {
+            conn = getDBConnection();
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, username);
+            result = stmt.executeQuery();
+
+            if(result.next()) {
+                return true;
+            }
+        } catch(SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            // Always attempt to close resources
+            try {
+                if (result != null) {
+                    result.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean insertUser(String username, String password) {
+        if(!checkUserExists(username)) {
+            Connection conn = null;
+            PreparedStatement stmt = null;
+            String query = "INSERT INTO users(Username, Password, Token) VALUES(?, ?, ?);";
+
+            try {
+                conn = getDBConnection();
+                conn.setAutoCommit(false); // Transaction start
+
+                // Generate unique API key
+                String apiKey = generateApiKey();
+                while(checkApiKey(apiKey)) {
+                    apiKey = generateApiKey();
+                }
+
+                stmt = conn.prepareStatement(query);
+                stmt.setString(1, username);
+                stmt.setString(2, password);
+                stmt.setString(3, apiKey);
+                stmt.executeUpdate();
+
+                return true;
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            } finally {
+                // Always attempt to close resources
+                try {
+                    if (stmt != null) {
+                        stmt.close();
+                    }
+                    if (conn != null) {
+                        conn.commit(); // Transaction end
+                        conn.close();
+                    }
+                } catch (SQLException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+        }
         return false;
     }
 }
