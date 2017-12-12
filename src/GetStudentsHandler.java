@@ -6,7 +6,7 @@ import com.sun.net.httpserver.HttpHandler;
 /**
  * Handler to retrieve all users.
  */
-public class GetUsersHandler implements HttpHandler {
+public class GetStudentsHandler implements HttpHandler {
     /**
      * Return all students from the database in JSON format when a valid GET request is made.
      * Implementation of {@link HttpHandler#handle}.
@@ -15,25 +15,25 @@ public class GetUsersHandler implements HttpHandler {
     public void handle(HttpExchange exch) {
         try {
 
-            String response;
+            StringBuilder response = new StringBuilder();
             int responseCode;
 
             if(exch.getRequestMethod().equalsIgnoreCase("GET")) {
                 Headers headers = exch.getResponseHeaders();
                 headers.set("Content-Type", "application/json");
 
-                if(Server.isValidToken(exch)) {
+                if(Controller.isValidToken(exch)) {
                     responseCode = 200;
-                    response = new Gson().toJson(StudentDAO.getAllStudents());
+                    response.append(new Gson().toJson(StudentDAO.getAllStudents()));
                 } else {
                     responseCode = 400;
-                    response = "Invalid API key";
+                    response.append("Invalid API key");
                 }
             } else {
                 responseCode = 400;
-                response = "Invalid GET request";
+                response.append("Invalid GET request");
             }
-            Server.writeResponse(exch, responseCode, response);
+            Controller.writeResponse(exch, responseCode, response);
         } catch(Exception e) {
             System.out.println(e.getMessage());
         }

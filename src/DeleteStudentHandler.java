@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Handler to delete an existing student.
  */
-public class DeleteUserHandler implements HttpHandler {
+public class DeleteStudentHandler implements HttpHandler {
     /**
      * Delete an existing student in the database based on a student number passed in id parameter. A valid DELETE request
      * and student number are required.
@@ -16,33 +16,33 @@ public class DeleteUserHandler implements HttpHandler {
     public void handle(HttpExchange exch) {
         try {
 
-            String response;
+            StringBuilder response = new StringBuilder();
             int responseCode;
 
             if(exch.getRequestMethod().equalsIgnoreCase("DELETE")) {
                 String queryString = exch.getRequestURI().getQuery();
 
-                if(Server.isValidToken(exch)) {
-                    Map<String, String> params = Server.getParameters(queryString);
+                if(Controller.isValidToken(exch)) {
+                    Map<String, String> params = Controller.getParameters(queryString);
                     int stuNumber = Integer.parseInt(params.get("id"));
                     boolean deleted = StudentDAO.deleteStudent(stuNumber);
 
                     if (deleted) {
                         responseCode = 200;
-                        response = "Student with ID: " + stuNumber + " deleted";
+                        response.append("Student with ID: " + stuNumber + " deleted");
                     } else {
                         responseCode = 400;
-                        response = "Invalid student ID";
+                        response.append("Invalid student ID");
                     }
                 } else {
                     responseCode = 400;
-                    response = "Invalid API key";
+                    response.append("Invalid API key");
                 }
             } else {
                 responseCode = 400;
-                response = "Invalid DELETE request";
+                response.append("Invalid DELETE request");
             }
-            Server.writeResponse(exch, responseCode, response);
+            Controller.writeResponse(exch, responseCode, response);
         } catch(Exception e) {
             System.out.println(e.getMessage());
         }

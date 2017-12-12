@@ -7,27 +7,27 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 /**
- * Handler to update an existing student.
+ * Handler to create a new user.
  */
-public class UpdateUserHandler implements HttpHandler {
+public class SetStudentHandler implements HttpHandler {
     /**
-     * Update an existing student in the database when a valid PUT request is made with valid JSON for the student.
+     * Insert a student into the database when a valid POST request is made with valid JSON for the student.
      * Implementation of {@link HttpHandler#handle}.
      * @param exch HttpExchange object to access request details/tailor response
      */
     public void handle(HttpExchange exch) {
         try {
 
-            String response;
+            StringBuilder response = new StringBuilder();
             int responseCode;
 
-            if(exch.getRequestMethod().equalsIgnoreCase("PUT")) {
-                if(Server.isValidToken(exch)) {
+            if(exch.getRequestMethod().equalsIgnoreCase("POST")) {
+                if(Controller.isValidToken(exch)) {
                     StringBuilder request = new StringBuilder(); // New string, can be altered
                     BufferedReader reader = new BufferedReader(new InputStreamReader(exch.getRequestBody())); // Read the req
                     String output;
 
-                    while((output = reader.readLine()) != null) {
+                    while ((output = reader.readLine()) != null) {
                         request.append(output); // Append request line by line to StringBuilder.
                     }
 
@@ -47,27 +47,28 @@ public class UpdateUserHandler implements HttpHandler {
                         float bursary = student.get("bursary").getAsFloat();
                         String email = student.get("email").getAsString();
 
-                        // update a student into the db using the values above.
-                        Student updated_student = new Student(name, gender, dob, address, postcode, sNumber, cTitle, startDate, bursary, email);
-                        StudentDAO.updateStudent(updated_student);
+                        // Insert a student into the db using the values above.
+
+                        StudentDAO.insertStudent(new Student(name, gender, dob, address, postcode, sNumber, cTitle, startDate, bursary, email));
 
                         responseCode = 200;
-                        response = "Successfully updated " + updated_student.getName();
-                    } catch(Exception e) {
+                        response.append("Successfully added student");
+                    } catch (Exception e) {
                         responseCode = 400;
-                        response = "Unable to update student: " + e.getMessage();
+                        response.append("Unable to add student: " + e.getMessage());
+                        Controller.writeResponse(exch, responseCode, response);
                     }
                     // Close the reader and write the response to the browser.
                     reader.close();
                 } else {
                     responseCode = 400;
-                    response = "Invalid API key";
+                    response.append("Invalid API key");
                 }
             } else {
                 responseCode = 400;
-                response = "Invalid PUT request";
+                response.append("Invalid POST request");
             }
-            Server.writeResponse(exch, responseCode, response);
+            Controller.writeResponse(exch, responseCode, response);
         } catch(Exception e) {
             System.out.println(e.getMessage());
         }
