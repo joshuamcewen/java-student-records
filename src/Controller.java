@@ -1,11 +1,16 @@
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.*;
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 /**
  * Creates a HTTP Server and routes with corresponding handlers for CRUD operations on the database.
  * @author Joshua McEwen (16012396)
@@ -32,6 +37,19 @@ public class Controller {
             server.setExecutor(null);
             server.start();
             System.out.println("Server started on port 8005.");
+
+            /*
+            String salt = getSalt();
+            String hash = getMD5(salt, "penguins");
+
+            String secondhash = "penguins";
+
+            if(hash.equals(getMD5(salt, secondhash))) {
+                System.out.println("It's a match.");
+            } else {
+                System.out.println("No match found.");
+            }*/
+
         } catch(IOException e) {
             System.out.println(e.getMessage());
         }
@@ -49,7 +67,7 @@ public class Controller {
             Map<String, String> params = getParameters(queryString);
             String apiKey = params.get("token");
 
-            if(apiKey != null && StudentDAO.checkApiKey(apiKey)) {
+            if(apiKey != null && UserDAO.checkApiKey(apiKey)) {
                 return true;
             }
         }

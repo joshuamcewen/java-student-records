@@ -43,8 +43,8 @@ public class LoginHandler implements HttpHandler {
                 String username = params.get("username");
                 String password = params.get("password");
 
-                if (StudentDAO.checkLoginCredentials(username, password)) {
-                    String token = StudentDAO.getApiKey(username);
+                if (UserDAO.checkLoginCredentials(username, password)) {
+                    String token = UserDAO.getApiKey(username);
 
                     responseCode = 200;
 

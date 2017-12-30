@@ -43,7 +43,7 @@ public class RegisterHandler implements HttpHandler {
                 String username = params.get("username");
                 String password = params.get("password");
 
-                if (StudentDAO.insertUser(username, password)) {
+                if (UserDAO.insertUser(username, password)) {
                     responseCode = 200;
                     response.append("<h1>Account created</h1>");
                     response.append("Please visit the <a href=\"login\">Login</a> page.");
