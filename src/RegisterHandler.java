@@ -8,6 +8,7 @@ import java.util.Map;
 
 /**
  * Handler to register a user.
+ * @author Joshua McEwen (16012396)
  */
 public class RegisterHandler implements HttpHandler {
     public void handle(HttpExchange exch) {

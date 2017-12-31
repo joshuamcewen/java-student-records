@@ -1,16 +1,11 @@
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.*;
-import java.math.BigInteger;
 import java.net.InetSocketAddress;
-import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 /**
  * Creates a HTTP Server and routes with corresponding handlers for CRUD operations on the database.
  * @author Joshua McEwen (16012396)

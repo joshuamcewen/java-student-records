@@ -7,7 +7,8 @@ import java.io.InputStreamReader;
 import java.util.Map;
 
 /**
- * Handler to retrieve an API token.
+ * Handler to handle login requests.
+ * @author Joshua McEwen (16012396)
  */
 public class LoginHandler implements HttpHandler {
     /**

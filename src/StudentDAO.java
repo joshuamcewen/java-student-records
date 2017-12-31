@@ -1,10 +1,5 @@
-import javax.xml.bind.DatatypeConverter;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * Provides methods that access the database and manipulate the student data in some way (CRUD).
