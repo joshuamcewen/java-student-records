@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 /**
  * Handler to retrieve all users.
+ * @author Joshua McEwen (16012396)
  */
 public class GetStudentsHandler implements HttpHandler {
     /**
@@ -18,11 +19,13 @@ public class GetStudentsHandler implements HttpHandler {
             StringBuilder response = new StringBuilder();
             int responseCode;
 
+            // If accessed through a GET request, continue to API token validation.
             if(exch.getRequestMethod().equalsIgnoreCase("GET")) {
                 Headers headers = exch.getResponseHeaders();
                 headers.set("Content-Type", "application/json");
 
-                if(Controller.isValidToken(exch)) {
+                // If a valid API token is present, append all students as a JSON array to the response.
+                if(UserDAO.isValidToken(exch)) {
                     responseCode = 200;
                     response.append(new Gson().toJson(StudentDAO.getAllStudents()));
                 } else {
@@ -33,6 +36,8 @@ public class GetStudentsHandler implements HttpHandler {
                 responseCode = 400;
                 response.append("Invalid GET request");
             }
+
+            // Return a response to the client with values set above.
             Controller.writeResponse(exch, responseCode, response);
         } catch(Exception e) {
             System.out.println(e.getMessage());

@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 
 /**
  * Handler to update an existing student.
+ * @author Joshua McEwen (16012396)
  */
 public class UpdateStudentHandler implements HttpHandler {
     /**
@@ -22,7 +23,7 @@ public class UpdateStudentHandler implements HttpHandler {
             int responseCode;
 
             if(exch.getRequestMethod().equalsIgnoreCase("PUT")) {
-                if(Controller.isValidToken(exch)) {
+                if(UserDAO.isValidToken(exch)) {
                     StringBuilder request = new StringBuilder(); // New string, can be altered
                     BufferedReader reader = new BufferedReader(new InputStreamReader(exch.getRequestBody())); // Read the req
                     String output;
@@ -67,6 +68,8 @@ public class UpdateStudentHandler implements HttpHandler {
                 responseCode = 400;
                 response.append("Invalid PUT request");
             }
+
+            // Return a response to the client with values set above.
             Controller.writeResponse(exch, responseCode, response);
         } catch(Exception e) {
             System.out.println(e.getMessage());

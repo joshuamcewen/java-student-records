@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 
 /**
  * Handler to create a new user.
+ * @author Joshua McEwen (16012396)
  */
 public class SetStudentHandler implements HttpHandler {
     /**
@@ -21,8 +22,9 @@ public class SetStudentHandler implements HttpHandler {
             StringBuilder response = new StringBuilder();
             int responseCode;
 
+            // If accessed through a post request, continue to API token validation.
             if(exch.getRequestMethod().equalsIgnoreCase("POST")) {
-                if(Controller.isValidToken(exch)) {
+                if(UserDAO.isValidToken(exch)) {
                     StringBuilder request = new StringBuilder(); // New string, can be altered
                     BufferedReader reader = new BufferedReader(new InputStreamReader(exch.getRequestBody())); // Read the req
                     String output;
@@ -68,6 +70,8 @@ public class SetStudentHandler implements HttpHandler {
                 responseCode = 400;
                 response.append("Invalid POST request");
             }
+
+            // Return a response to the client with values set above.
             Controller.writeResponse(exch, responseCode, response);
         } catch(Exception e) {
             System.out.println(e.getMessage());

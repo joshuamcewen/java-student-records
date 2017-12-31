@@ -53,7 +53,6 @@ public class DatabaseTester {
         System.out.println();
 
         // Delete the student we just created.
-        /*
         System.out.println("Deleting the student with the ID: 10202344");
 
         boolean deleted = StudentDAO.deleteStudent(10202344);
@@ -62,7 +61,5 @@ public class DatabaseTester {
         } else {
             System.out.println("Unable to delete student.");
         }
-
-        */
     }
 }

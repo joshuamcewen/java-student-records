@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.util.Map;
 
 /**
- * Handler to retrieve an API token.
+ * Handler to register a user.
  */
 public class RegisterHandler implements HttpHandler {
     public void handle(HttpExchange exch) {
@@ -18,8 +18,8 @@ public class RegisterHandler implements HttpHandler {
             Headers headers = exch.getResponseHeaders();
             headers.set("Content-Type", "text/html");
 
+            // If accessed through a GET request, respond with a signup form.
             if(exch.getRequestMethod().equalsIgnoreCase("GET")) {
-
                 responseCode = 200;
                 response.append("<h1>Register</h1>");
                 response.append("<p>Enter your details for registration.</p>");
@@ -30,6 +30,7 @@ public class RegisterHandler implements HttpHandler {
                 response.append("</form>");
                 response.append("<p>If you already have an account, login <a href=\"login\">here</a>.</p>");
 
+            // If accessed through a POST request, process POST data with account creation logic.
             } else if(exch.getRequestMethod().equalsIgnoreCase("POST")) {
                 StringBuilder request = new StringBuilder(); // New string, can be altered
                 BufferedReader reader = new BufferedReader(new InputStreamReader(exch.getRequestBody())); // Read the req
@@ -39,10 +40,12 @@ public class RegisterHandler implements HttpHandler {
                     request.append(output); // Append request line by line to StringBuilder.
                 }
 
+                // Retrieve POST data through the request by mapping key pair values for username and password.
                 Map<String, String> params = Controller.getParameters(request.toString());
                 String username = params.get("username");
                 String password = params.get("password");
 
+                // If the user is successfully created, add an appropriate message to the response.
                 if (UserDAO.insertUser(username, password)) {
                     responseCode = 200;
                     response.append("<h1>Account created</h1>");
@@ -57,6 +60,7 @@ public class RegisterHandler implements HttpHandler {
                 response.append("Invalid GET/POST request");
             }
 
+            // Return a response to the client with values set above.
             Controller.writeResponse(exch, responseCode, response);
         } catch(Exception e) {
             System.out.println(e.getMessage());

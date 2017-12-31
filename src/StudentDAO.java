@@ -45,6 +45,8 @@ public class StudentDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
+
+        // Retrieve all students.
         String query = "SELECT * FROM students;";
 
         try {
@@ -98,6 +100,8 @@ public class StudentDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
+
+        // Retrieve student by student number.
         String query = "SELECT * FROM students WHERE StudentNumber = ?;";
 
         try {
@@ -150,6 +154,8 @@ public class StudentDAO {
     public static boolean insertStudent(Student student) {
         Connection conn = null;
         PreparedStatement stmt = null;
+
+        // Insert a new record into the students table.
         String query = "INSERT INTO students(Name, Gender, DOB, Address, Postcode, StudentNumber, CourseTitle, StartDate, Bursary, Email) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
         try {
@@ -198,6 +204,8 @@ public class StudentDAO {
     public static boolean deleteStudent(int stuNumber) {
         Connection conn = null;
         PreparedStatement stmt = null;
+
+        // Delete student record by student number.
         String query = "DELETE FROM students WHERE StudentNumber = ?;";
 
         try {
@@ -238,6 +246,8 @@ public class StudentDAO {
     public static boolean updateStudent(Student student) {
         Connection conn = null;
         PreparedStatement stmt = null;
+
+        // Update a student record.
         String query = "UPDATE students SET Name = ?, Gender = ?, DOB = ?, Address = ?, Postcode = ?, StudentNumber = ?, CourseTitle = ?, StartDate = ?, Bursary = ?, Email = ?  WHERE StudentNumber = ?;";
 
         try {

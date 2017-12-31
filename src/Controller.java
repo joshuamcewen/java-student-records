@@ -56,25 +56,6 @@ public class Controller {
     }
 
     /**
-     * Checks the API token supplied as a URL parameter and returns a boolean based on the outcome of that check.
-     * @param exch HttpExchange object to access request details
-     * @return true/false depending on whether the token exists or not.
-     */
-    public static boolean isValidToken(HttpExchange exch) {
-        String queryString = exch.getRequestURI().getQuery();
-
-        if(queryString != null) {
-            Map<String, String> params = getParameters(queryString);
-            String apiKey = params.get("token");
-
-            if(apiKey != null && UserDAO.checkApiKey(apiKey)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Sets the headers for the response and writes the body to displayed to users when routes are accessed.
      * @param exch HttpExchange object to modify and send response
      * @param status A HTTP response code based on result of request

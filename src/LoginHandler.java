@@ -10,6 +10,12 @@ import java.util.Map;
  * Handler to retrieve an API token.
  */
 public class LoginHandler implements HttpHandler {
+    /**
+     * Returns HTML form for login requests. Handles login logic and if successful,
+     * provides an interface to view API token and links to other routes.
+     * Implementation of {@link HttpHandler#handle}.
+     * @param exch HttpExchange object to access request details/tailor response
+     */
     public void handle(HttpExchange exch) {
         try {
             StringBuilder response = new StringBuilder();
@@ -18,6 +24,7 @@ public class LoginHandler implements HttpHandler {
             Headers headers = exch.getResponseHeaders();
             headers.set("Content-Type", "text/html");
 
+            // If accessed through a GET request, respond with a login form.
             if(exch.getRequestMethod().equalsIgnoreCase("GET")) {
 
                 responseCode = 200;
@@ -30,6 +37,7 @@ public class LoginHandler implements HttpHandler {
                 response.append("</form>");
                 response.append("<p>If you don't have an account, register <a href=\"register\">here</a>.</p>");
 
+                // If accessed through a POST request, process POST data with account login logic.
             } else if(exch.getRequestMethod().equalsIgnoreCase("POST")) {
                 StringBuilder request = new StringBuilder(); // New string, can be altered
                 BufferedReader reader = new BufferedReader(new InputStreamReader(exch.getRequestBody())); // Read the req
@@ -39,10 +47,12 @@ public class LoginHandler implements HttpHandler {
                     request.append(output); // Append request line by line to StringBuilder.
                 }
 
+                // Retrieve POST data through the request by mapping key pair values for username and password.
                 Map<String, String> params = Controller.getParameters(request.toString());
                 String username = params.get("username");
                 String password = params.get("password");
 
+                // If the user's details are correct, retrieve their API key and provide a GUI for them to manage their account.
                 if (UserDAO.checkLoginCredentials(username, password)) {
                     String token = UserDAO.getApiKey(username);
 
@@ -61,15 +71,18 @@ public class LoginHandler implements HttpHandler {
                     response.append("<li>To <b>delete</b> a specific student use DELETE: /<b>student/delete</b>?token=" + token + "&id=<b>16012495</b></li>");
                     response.append("</ul>");
                 } else {
+                    // If a user's details are incorrect, append an appropriate message to the response.
                     responseCode = 400;
                     response.append("<h1>Invalid Credentials</h1>");
                     response.append("<p>Please try again, <a href=\"login\">here</a>.</p>");
                 }
             } else {
+                // If neither a GET or POST request is made, return a 400 bad request header.
                 responseCode = 400;
                 response.append("Invalid GET/POST request");
             }
 
+            // Return a response to the client with values set above.
             Controller.writeResponse(exch, responseCode, response);
         } catch(Exception e) {
             System.out.println(e.getMessage());
