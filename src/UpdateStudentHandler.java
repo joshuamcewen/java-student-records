@@ -23,7 +23,7 @@ public class UpdateStudentHandler implements HttpHandler {
             int responseCode;
 
             if(exch.getRequestMethod().equalsIgnoreCase("PUT")) {
-                if(UserDAO.isValidToken(exch)) {
+                if(StudentDAO.isValidToken(exch)) {
                     StringBuilder request = new StringBuilder(); // New string, can be altered
                     BufferedReader reader = new BufferedReader(new InputStreamReader(exch.getRequestBody())); // Read the req
                     String output;

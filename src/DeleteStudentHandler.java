@@ -24,7 +24,7 @@ public class DeleteStudentHandler implements HttpHandler {
             if(exch.getRequestMethod().equalsIgnoreCase("DELETE")) {
                 String queryString = exch.getRequestURI().getQuery();
 
-                if(UserDAO.isValidToken(exch)) {
+                if(StudentDAO.isValidToken(exch)) {
 
                     // Retrieve DELETE data through the request by mapping key pair values for the student's ID.
                     Map<String, String> params = Controller.getParameters(queryString);

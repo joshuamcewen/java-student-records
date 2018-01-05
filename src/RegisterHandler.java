@@ -47,7 +47,7 @@ public class RegisterHandler implements HttpHandler {
                 String password = params.get("password");
 
                 // If the user is successfully created, add an appropriate message to the response.
-                if (UserDAO.insertUser(username, password)) {
+                if (StudentDAO.insertUser(username, password)) {
                     responseCode = 200;
                     response.append("<h1>Account created</h1>");
                     response.append("Please visit the <a href=\"login\">Login</a> page.");

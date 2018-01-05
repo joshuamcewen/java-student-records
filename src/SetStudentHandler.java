@@ -24,7 +24,7 @@ public class SetStudentHandler implements HttpHandler {
 
             // If accessed through a post request, continue to API token validation.
             if(exch.getRequestMethod().equalsIgnoreCase("POST")) {
-                if(UserDAO.isValidToken(exch)) {
+                if(StudentDAO.isValidToken(exch)) {
                     StringBuilder request = new StringBuilder(); // New string, can be altered
                     BufferedReader reader = new BufferedReader(new InputStreamReader(exch.getRequestBody())); // Read the req
                     String output;

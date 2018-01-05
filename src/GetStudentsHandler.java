@@ -25,7 +25,7 @@ public class GetStudentsHandler implements HttpHandler {
                 headers.set("Content-Type", "application/json");
 
                 // If a valid API token is present, append all students as a JSON array to the response.
-                if(UserDAO.isValidToken(exch)) {
+                if(StudentDAO.isValidToken(exch)) {
                     responseCode = 200;
                     response.append(new Gson().toJson(StudentDAO.getAllStudents()));
                 } else {

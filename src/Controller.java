@@ -33,18 +33,6 @@ public class Controller {
             server.start();
             System.out.println("Server started on port 8005.");
 
-            /*
-            String salt = getSalt();
-            String hash = getMD5(salt, "penguins");
-
-            String secondhash = "penguins";
-
-            if(hash.equals(getMD5(salt, secondhash))) {
-                System.out.println("It's a match.");
-            } else {
-                System.out.println("No match found.");
-            }*/
-
         } catch(IOException e) {
             System.out.println(e.getMessage());
         }

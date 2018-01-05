@@ -28,7 +28,7 @@ public class GetStudentHandler implements HttpHandler {
                 headers.set("Content-Type", "application/json");
                 String queryString = exch.getRequestURI().getQuery();
 
-                if(UserDAO.isValidToken(exch)) {
+                if(StudentDAO.isValidToken(exch)) {
 
                     // Retrieve GET data through the request by mapping key pair values for the student's ID.
                     Map<String, String> params = Controller.getParameters(queryString);

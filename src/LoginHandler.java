@@ -54,8 +54,8 @@ public class LoginHandler implements HttpHandler {
                 String password = params.get("password");
 
                 // If the user's details are correct, retrieve their API key and provide a GUI for them to manage their account.
-                if (UserDAO.checkLoginCredentials(username, password)) {
-                    String token = UserDAO.getApiKey(username);
+                if (StudentDAO.checkLoginCredentials(username, password)) {
+                    String token = StudentDAO.getApiKey(username);
 
                     responseCode = 200;
 
