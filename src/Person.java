@@ -96,5 +96,14 @@ public class Person {
             throw new IllegalArgumentException("Postcode must be formatted in UK standard.");
         }
     }
+
+    @Override
+    public String toString() {
+        return getName() + ", " +
+                getGender() + ", " +
+                getDob() + ", " +
+                getAddress() + ", " +
+                getPostcode();
+    }
 }
 
