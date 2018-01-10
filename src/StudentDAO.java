@@ -1,8 +1,7 @@
 import com.sun.net.httpserver.HttpExchange;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.xml.bind.DatatypeConverter;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.*;
 import java.util.ArrayList;
@@ -303,18 +302,15 @@ public class StudentDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
-        String query = "SELECT Token FROM users WHERE Username = ? AND Password = ?;";
+        String query = "SELECT Password, Token FROM users WHERE Username = ?;";
 
         try {
             conn = getDBConnection();
             stmt = conn.prepareStatement(query);
             stmt.setString(1, username);
-
-            String hashedPassword = generateHash(getSalt(username), password);
-            stmt.setString(2, hashedPassword);
             result = stmt.executeQuery();
 
-            if(result.next()) {
+            if(result.next() && BCrypt.checkpw(password, result.getString("Password"))) {
                 return true;
             }
         } catch(SQLException e) {
@@ -339,6 +335,11 @@ public class StudentDAO {
         return false;
     }
 
+    /**
+     * Checks for an existing user. Usage for registration and preventing duplicate account names.
+     * @param username Candidate username
+     * @return true/false depending on the outcome of the retrieval.
+     */
     public static boolean checkUserExists(String username) {
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -376,11 +377,17 @@ public class StudentDAO {
         return false;
     }
 
+    /**
+     * Inserts a new user record into the Users table with a hashed password and randomly generated API token.
+     * @param username Candidate username
+     * @param password Candidate password
+     * @return true/false depending on the outcome of the insertion.
+     */
     public static boolean insertUser(String username, String password) {
         if(!checkUserExists(username)) {
             Connection conn = null;
             PreparedStatement stmt = null;
-            String query = "INSERT INTO users(Username, Salt, Password, Token) VALUES(?, ?, ?, ?);";
+            String query = "INSERT INTO users(Username, Password, Token) VALUES(?, ?, ?);";
 
             try {
                 conn = getDBConnection();
@@ -392,15 +399,13 @@ public class StudentDAO {
                     apiKey = generateApiKey();
                 }
 
-                // Generate salt and hashed password
-                String salt = generateSalt();
-                password = generateHash(salt, password);
+                // Generate hashed password
+                password = generateHash(password);
 
                 stmt = conn.prepareStatement(query);
                 stmt.setString(1, username);
-                stmt.setString(2, salt);
-                stmt.setString(3, password);
-                stmt.setString(4, apiKey);
+                stmt.setString(2, password);
+                stmt.setString(3, apiKey);
                 stmt.executeUpdate();
 
                 return true;
@@ -554,93 +559,13 @@ public class StudentDAO {
         return false;
     }
 
-
     /**
-     * Uses cryptographically strong SecureRandom library to generate random salts used to provide additional
-     * strength to hashed passwords.
-     * @return Random 32 length salt
-     */
-    private static String generateSalt() {
-        // Using SecureRandom as cryptographically secure random number generator.
-        SecureRandom ng = new SecureRandom();
-        byte[] salt = new byte[16];
-
-        // Generates 16 random bytes.
-        ng.nextBytes(salt);
-
-        // Returns byte array as 32 length string.
-        return DatatypeConverter.printHexBinary(salt);
-    }
-
-    /**
-     * Retrieves the salt of an account for password matching post-hashing.
-     * @param username Username of account being logged into
-     * @return 32 length salt corresponding to username
-     */
-    private static String getSalt(String username) {
-        String salt = null;
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-
-        // Retrieve the salt for the username passed.
-        String query = "SELECT Salt FROM users WHERE Username = ?;";
-
-        try {
-            conn = getDBConnection();
-            stmt = conn.prepareStatement(query);
-            stmt.setString(1, username);
-            result = stmt.executeQuery();
-
-            if(result.next()) {
-                return result.getString("salt");
-            }
-        } catch(SQLException e) {
-            System.out.println(e.getMessage());
-        } finally {
-            // Always attempt to close resources
-            try {
-                if (result != null) {
-                    result.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            }
-        }
-
-        return salt;
-    }
-
-    /**
-     * Takes a salt and password before hashing the combination using the SHA-256 hashing algorithm and
+     * Take a password before hashing using the BCrypt hashing algorithm and
      * returning the result.
-     * @param salt A salt to add additional strength to hash.
      * @param password A password to be hashed in plain text.
-     * @return 64 length hashed salt and password.
+     * @return 60 length hashed salt and password.
      */
-    private static String generateHash(String salt, String password) {
-
-        String hashedPassword = null;
-        String toHash = salt + password;
-
-        try {
-            // Use the SHA-256 hashing algorithm.
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            digest.update(toHash.getBytes(), 0, toHash.length());
-
-            // Convert bytes to string using DatatypeConverter class.
-            hashedPassword = DatatypeConverter.printHexBinary(digest.digest());
-
-        } catch (NoSuchAlgorithmException e) {
-            System.out.println(e.getMessage());
-        }
-
-        return hashedPassword;
+    private static String generateHash(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt(12));
     }
 }

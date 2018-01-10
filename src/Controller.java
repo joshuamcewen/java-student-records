@@ -31,7 +31,7 @@ public class Controller {
             server.createContext("/register", new RegisterHandler());
             server.setExecutor(null);
             server.start();
-            System.out.println("Server started on port 8005.");
+            System.out.println("Server started on port 8005. To login, visit http://localhost:8005/login");
 
         } catch(IOException e) {
             System.out.println(e.getMessage());
