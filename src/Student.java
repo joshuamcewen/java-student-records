@@ -52,7 +52,7 @@ public class Student extends Person {
      * @throws IllegalArgumentException if validation fails
      */
     public void setCourseTitle(String courseTitle) {
-        if(Integer.toString(studentNumber).matches("^[\\w\\s']{1,45}+$")) {
+        if(courseTitle.matches("^[\\w\\s']{1,45}+$")) {
             this.courseTitle = courseTitle;
         } else {
             throw new IllegalArgumentException("Course title must contain letters, spaces and ('_) only.");
